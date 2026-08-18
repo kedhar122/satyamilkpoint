@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Satya Milk Point — Farmer Payments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF6E6;
+    --paper-line:#FFE7BE;
+    --ink:#123C6B;
+    --ink-dark:#0B2A4D;
+    --text:#22314A;
+    --text-soft:#5C6B84;
+    --red:#E63946;
+    --green:#12A454;
+    --green-bg:#DFF6E7;
+    --red-bg:#FCE3E6;
+    --white:#FFFFFF;
+    --sun:#FFC145;
+    --sky:#2BB3E0;
+    --grass:#12A454;
+    --shadow: 0 3px 10px rgba(18,60,107,0.14);
+    --radius: 14px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+      scroll-behavior:auto !important;
+    }
+  }
+  @keyframes dropBounce{
+    0%{transform:translateY(-16px) scale(0.7) rotate(-8deg); opacity:0;}
+    55%{transform:translateY(4px) scale(1.08) rotate(3deg); opacity:1;}
+    75%{transform:translateY(-3px) scale(0.97) rotate(-1deg);}
+    100%{transform:translateY(0) scale(1) rotate(0deg);}
+  }
+  @keyframes logoFloat{
+    0%,100%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-3px) rotate(-2deg);}
+  }
+  @keyframes shineSweep{
+    0%{left:-60%;}
+    45%{left:120%;}
+    100%{left:120%;}
+  }
+  @keyframes floatBlob1{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(35px,45px) scale(1.15);}
+  }
+  @keyframes floatBlob2{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-30px,-35px) scale(1.12);}
+  }
+  @keyframes floatBlob3{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(25px,-30px) scale(1.08);}
+  }
+  @keyframes fadeSlideIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes popBadge{
+    0%{transform:scale(0.4) rotate(-3deg); opacity:0;}
+    65%{transform:scale(1.18) rotate(-3deg); opacity:1;}
+    100%{transform:scale(1) rotate(-3deg); opacity:1;}
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @keyframes toastPop{
+    from{opacity:0; transform:translateX(-50%) translateY(10px) scale(0.9);}
+    to{opacity:1; transform:translateX(-50%) translateY(-4px) scale(1);}
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image: repeating-linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--paper-line) 28px);
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    padding-bottom:78px;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    top:0; bottom:0; left:34px;
+    width:2px;
+    background:linear-gradient(var(--sky), var(--sun), var(--red));
+    opacity:0.4;
+    z-index:0;
+  }
+  .bg-blobs{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+  .blob{position:absolute; border-radius:50%; filter:blur(70px);}
+  .blob1{width:280px; height:280px; top:-70px; right:-60px; background:var(--sun); opacity:0.3; animation:floatBlob1 16s ease-in-out infinite;}
+  .blob2{width:260px; height:260px; top:22%; left:-100px; background:var(--sky); opacity:0.22; animation:floatBlob2 20s ease-in-out infinite;}
+  .blob3{width:240px; height:240px; bottom:-80px; right:-50px; background:var(--grass); opacity:0.2; animation:floatBlob3 18s ease-in-out infinite;}
+  .app{position:relative; z-index:1; max-width:640px; margin:0 auto; padding:0 14px;}
+  header.top{
+    margin:0 -14px 8px -14px;
+    padding:20px 18px 24px 44px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:linear-gradient(135deg, var(--grass) 0%, var(--sky) 100%);
+    border-radius:0 0 22px 22px;
+    box-shadow:0 4px 16px rgba(18,60,107,0.2);
+    position:relative;
+    overflow:hidden;
+  }
+  .brand{display:flex; align-items:center; gap:11px; position:relative; z-index:1;}
+  .logo-badge{
+    width:44px; height:44px; border-radius:50%;
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden; flex-shrink:0;
+    box-shadow:0 3px 10px rgba(0,0,0,0.2), 0 0 0 3px rgba(255,255,255,0.25);
+    animation: dropBounce 0.9s cubic-bezier(.34,1.56,.64,1) 1, logoFloat 2.6s ease-in-out infinite 0.9s;
+  }
+  .logo-badge svg{position:relative; z-index:1;}
+  .logo-shine{
+    position:absolute; top:-15%; left:-60%; width:35%; height:150%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.9), transparent);
+    transform:rotate(18deg);
+    animation: shineSweep 3.6s ease-in-out infinite;
+    z-index:2;
+  }
+  .brand h1{
+    font-family:'Baloo 2', cursive;
+    font-weight:800;
+    font-size:21px;
+    margin:0;
+    color:#fff;
+    letter-spacing:0.2px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.12);
+  }
+  .brand span.sub{
+    display:block;
+    font-size:11.5px;
+    color:rgba(255,255,255,0.9);
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+  .rate-pill{
+    background:var(--white);
+    border:none;
+    color:var(--ink-dark);
+    padding:7px 12px;
+    border-radius:20px;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:12px;
+    white-space:nowrap;
+    box-shadow:0 3px 8px rgba(0,0,0,0.18);
+    position:relative; z-index:1;
+  }
+  main{padding:4px 6px 24px 40px;}
+  main#main{animation: fadeSlideIn 0.35s ease;}
+  .card{
+    background:var(--white);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+    margin-bottom:14px;
+    border:1px solid rgba(18,60,107,0.06);
+  }
+  h2.section-title{
+    font-family:'Baloo 2', cursive;
+    font-weight:700;
+    font-size:16px;
+    color:var(--ink-dark);
+    margin:0 0 12px 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  h2.section-title .stamp{
+    display:inline-block;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:#fff;
+    background:linear-gradient(135deg, var(--sky), var(--grass));
+    padding:3px 7px;
+    border-radius:5px;
+    transform:rotate(-3deg);
+    text-transform:uppercase;
+    font-family:'Inter',sans-serif;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-soft);
+    margin-bottom:5px;
+    margin-top:12px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type=text], input[type=number], input[type=date], select{
+    width:100%;
+    padding:11px 12px;
+    border:1.5px solid #E7D9B8;
+    border-radius:8px;
+    background:var(--white);
+    font-size:15px;
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    transition:border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, select:focus{outline:none; border-color:var(--sky); box-shadow:0 0 0 3px rgba(43,179,224,0.2);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:12px 16px;
+    border-radius:999px;
+    border:none;
+    font-size:14px;
+    font-weight:700;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    width:100%;
+    margin-top:14px;
+    transition:transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  }
+  .btn:active{transform:scale(0.96);}
+  .btn-primary{background:linear-gradient(135deg, var(--grass), var(--sky)); color:var(--white); box-shadow:0 4px 14px rgba(18,164,84,0.3);}
+  .btn-danger{background:var(--red-bg); color:var(--red); border:1.5px solid var(--red); width:auto; padding:7px 12px; font-size:12px; margin-top:0; box-shadow:none;}
+  .btn-outline{background:var(--white); color:var(--ink); border:1.5px solid var(--ink); width:auto; padding:7px 12px; font-size:12px; margin-top:0; box-shadow:none;}
+  .btn-green{background:linear-gradient(135deg, var(--green), var(--sky)); color:var(--white); width:auto; padding:8px 14px; font-size:12px; margin-top:0; box-shadow:0 3px 10px rgba(18,164,84,0.3);}
+  .preview{
+    margin-top:14px;
+    background:linear-gradient(135deg, rgba(43,179,224,0.08), rgba(18,164,84,0.08));
+    border:1.5px dashed #B9E1CF;
+    border-radius:8px;
+    padding:14px;
+    text-align:center;
+  }
+  .preview .amt{
+    font-family:'JetBrains Mono',monospace;
+    font-size:28px;
+    font-weight:700;
+    color:var(--ink-dark);
+    background:linear-gradient(135deg, var(--grass), var(--sky));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .preview .lbl{font-size:11px; color:var(--text-soft); font-weight:600; letter-spacing:0.4px;}
+  .ledger-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:11px 4px;
+    border-bottom:1px solid #F2E9D2;
+    gap:8px;
+  }
+  .ledger-row:last-child{border-bottom:none;}
+  .ledger-row .info{min-width:0;}
+  .ledger-row .name{font-weight:700; font-size:14px; color:var(--text);}
+  .ledger-row .meta{font-size:12px; color:var(--text-soft); font-family:'JetBrains Mono',monospace;}
+  .ledger-row .actions{display:flex; gap:6px; flex-shrink:0;}
+  .num{font-family:'JetBrains Mono',monospace; font-weight:700;}
+  .empty{
+    text-align:center;
+    padding:26px 10px;
+    color:var(--text-soft);
+    font-size:13px;
+  }
+  .tabs-quick{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+  .qbtn{
+    background:var(--white);
+    border:1.5px solid #E7D9B8;
+    color:var(--text);
+    padding:7px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform 0.12s ease;
+  }
+  .qbtn:active{transform:scale(0.94);}
+  .qbtn.active{background:linear-gradient(135deg, var(--grass), var(--sky)); border-color:transparent; color:var(--white);}
+  .report-farmer{
+    border-bottom:1px solid #F2E9D2;
+    padding:12px 2px;
+  }
+  .report-farmer:last-child{border-bottom:none;}
+  .rf-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .rf-name{font-weight:700; font-size:14.5px;}
+  .rf-book{font-size:11px; color:var(--text-soft); font-family:'JetBrains Mono',monospace;}
+  .rf-amt{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:17px; color:var(--ink-dark); text-align:right;}
+  .rf-detail{font-size:11.5px; color:var(--text-soft); margin-top:2px;}
+  .paid-badge{
+    display:inline-block;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:4px;
+    transform:rotate(-3deg);
+    animation:popBadge 0.35s ease;
+  }
+  .paid-yes{color:var(--green); border:1.5px solid var(--green); background:var(--green-bg);}
+  .paid-no{color:var(--red); border:1.5px solid var(--red); background:var(--red-bg);}
+  .rf-bottom{display:flex; justify-content:space-between; align-items:center; margin-top:8px;}
+  .total-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    background:linear-gradient(135deg, var(--ink-dark), var(--sky));
+    color:var(--white);
+    padding:14px 16px; border-radius:12px; margin-top:4px;
+    box-shadow:0 4px 14px rgba(18,60,107,0.25);
+  }
+  .total-bar .l{font-size:12px; font-weight:600; letter-spacing:0.4px; opacity:0.9;}
+  .total-bar .v{font-family:'JetBrains Mono',monospace; font-size:21px; font-weight:700;}
+  nav.bottom{
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--white);
+    border-top:1.5px solid #F2E9D2;
+    display:flex;
+    z-index:5;
+    box-shadow:0 -3px 10px rgba(18,60,107,0.1);
+    padding:6px 6px;
+    gap:4px;
+  }
+  nav.bottom button{
+    flex:1;
+    background:none; border:none;
+    padding:8px 4px;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--text-soft);
+    font-size:10.5px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    border-radius:14px;
+    transition:background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+  nav.bottom button:active{transform:scale(0.92);}
+  nav.bottom button.active{
+    color:var(--white);
+    background:linear-gradient(135deg, var(--grass), var(--sky));
+    box-shadow:0 3px 10px rgba(18,164,84,0.35);
+  }
+  nav.bottom button svg{width:20px; height:20px;}
+  .hint{font-size:11.5px; color:var(--text-soft); margin-top:6px; line-height:1.5;}
+  .field-note{font-size:11px; color:var(--text-soft); margin-top:4px;}
+  .search-box{margin-bottom:10px;}
+  .farmer-pick{
+    max-height:170px; overflow-y:auto;
+    border:1.5px solid #E7D9B8; border-radius:8px;
+    background:var(--white);
+  }
+  .farmer-pick .fp-item{
+    padding:10px 12px;
+    border-bottom:1px solid #F2E9D2;
+    cursor:pointer;
+    display:flex; justify-content:space-between;
+    transition:background 0.12s ease;
+  }
+  .farmer-pick .fp-item:last-child{border-bottom:none;}
+  .farmer-pick .fp-item.selected{background:linear-gradient(135deg, rgba(18,164,84,0.1), rgba(43,179,224,0.1));}
+  .farmer-pick .fp-item:active{background:var(--paper);}
+  .selected-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg, rgba(18,164,84,0.12), rgba(43,179,224,0.12));
+    border:1.5px solid var(--sky);
+    padding:8px 12px; border-radius:8px; margin-top:8px; font-size:13px; font-weight:600;
+  }
+  .toast{
+    position:fixed; bottom:88px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(135deg, var(--ink-dark), var(--sky));
+    color:var(--white);
+    padding:11px 20px; border-radius:20px; font-size:13px; font-weight:600;
+    box-shadow:0 6px 16px rgba(18,60,107,0.3); z-index:20; opacity:0; pointer-events:none;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-4px); animation:toastPop 0.3s ease;}
+  .loading{text-align:center; padding:50px 10px; color:var(--text-soft); font-size:13px; font-weight:600;}
+  .loading::before{
+    content:"";
+    display:block;
+    width:36px; height:36px;
+    margin:0 auto 12px auto;
+    border-radius:50%;
+    border:4px solid var(--paper-line);
+    border-top-color:var(--grass);
+    border-right-color:var(--sky);
+    animation:spin 0.8s linear infinite;
+  }
+  @media(min-width:520px){
+    .row2.entry-grid{grid-template-columns:1fr 1fr 1fr;}
+  }
+  .bulk-day{border-bottom:1px solid #F2E9D2; padding:12px 2px;}
+  .bulk-day:last-child{border-bottom:none;}
+  .bulk-day-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .bulk-day-head .d{font-weight:700; font-size:13px; color:var(--text);}
+  .bulk-day-head .amt{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px; color:var(--ink-dark);}
+  .bulk-sessions{display:flex; gap:8px;}
+  .bulk-session{flex:1; background:linear-gradient(135deg, rgba(43,179,224,0.06), rgba(18,164,84,0.06)); border-radius:8px; padding:8px;}
+  .bulk-session .slbl{font-size:10.5px; font-weight:700; color:var(--text-soft); letter-spacing:0.4px; margin-bottom:6px; text-transform:uppercase;}
+  .bulk-session .inputs{display:flex; gap:6px;}
+  .bulk-session input{width:100%; padding:7px 8px; font-size:13px; border-radius:6px;}
+  .bulk-session .subamt{font-size:10.5px; color:var(--text-soft); margin-top:5px; font-family:'JetBrains Mono',monospace;}
+  @keyframes modalPop{
+    from{opacity:0; transform:scale(0.92) translateY(8px);}
+    to{opacity:1; transform:scale(1) translateY(0);}
+  }
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(11,42,77,0.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:60; padding:20px;
+  }
+  .modal-box{
+    background:var(--white); border-radius:16px; padding:20px;
+    max-width:380px; width:100%;
+    box-shadow:0 12px 32px rgba(11,42,77,0.35);
+    animation:modalPop 0.22s ease;
+    max-height:85vh; overflow-y:auto;
+  }
+  .modal-title{font-family:'Baloo 2',cursive; font-weight:700; font-size:17px; color:var(--ink-dark); margin-bottom:12px;}
+  .modal-body label:first-of-type{margin-top:0;}
+  .modal-actions{display:flex; gap:10px; margin-top:18px;}
+  .modal-actions .btn{margin-top:0; width:auto; flex:1;}
+  .btn-danger-solid{background:linear-gradient(135deg, var(--red), #FF7A6E); color:#fff; box-shadow:0 4px 14px rgba(230,57,70,0.35);}
+  .mode-switch{
+    display:flex; gap:6px; margin:14px 0 12px 40px;
+    background:var(--white); padding:5px; border-radius:16px;
+    box-shadow:var(--shadow); position:relative; z-index:1;
+  }
+  .mode-btn{
+    flex:1; border:none; background:transparent;
+    padding:10px 6px; border-radius:12px;
+    font-weight:700; font-size:13px; font-family:'Inter',sans-serif;
+    color:var(--text-soft); cursor:pointer;
+    transition:background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+  .mode-btn:active{transform:scale(0.96);}
+  .mode-btn.active{
+    background:linear-gradient(135deg, var(--grass), var(--sky));
+    color:#fff;
+    box-shadow:0 3px 10px rgba(18,164,84,0.3);
+  }
+  .total-bar-split{display:flex; gap:10px; margin-top:4px;}
+  .tb-item{flex:1; border-radius:12px; padding:11px 10px; text-align:center;}
+  .tb-item.am{background:linear-gradient(135deg, rgba(255,193,69,0.18), rgba(255,193,69,0.08)); border:1.5px solid rgba(255,193,69,0.5);}
+  .tb-item.pm{background:linear-gradient(135deg, rgba(43,179,224,0.16), rgba(43,179,224,0.06)); border:1.5px solid rgba(43,179,224,0.5);}
+  .tb-l{font-size:10.5px; font-weight:700; letter-spacing:0.4px; color:var(--text-soft); text-transform:uppercase;}
+  .tb-v{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; color:var(--ink-dark); margin-top:2px;}
+  .rf-split{display:flex; gap:10px; margin-top:6px; font-size:11.5px;}
+  .rf-split span{flex:1; background:var(--paper); border-radius:6px; padding:5px 8px; color:var(--text-soft); font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="bg-blobs">
+  <span class="blob blob1"></span>
+  <span class="blob blob2"></span>
+  <span class="blob blob3"></span>
+</div>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo-badge">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <defs>
+            <linearGradient id="dropGrad" x1="4" y1="2" x2="18" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2BB3E0"/>
+              <stop offset="100%" stop-color="#12A454"/>
+            </linearGradient>
+          </defs>
+          <path d="M9 2h6l1 4-1.2 1.2c-.6.6-1 1.5-1 2.4v9.4a2 2 0 0 1-2 2h-1.6a2 2 0 0 1-2-2v-9.4c0-.9-.4-1.8-1-2.4L8 6l1-4Z" fill="url(#dropGrad)"/>
+          <path d="M8.5 12.2h7" stroke="#fff" stroke-width="1.3" stroke-opacity="0.85" stroke-linecap="round"/>
+          <path d="M17.5 15.5c1.6.3 2.5 1.3 2.5 2.6 0 1.5-1.4 2.4-2.9 2.1-1.1-.2-1.8-1-1.6-2 .2-1 1.1-1.4 2-2.7Z" fill="#FFC145"/>
+        </svg>
+        <span class="logo-shine"></span>
+      </div>
+      <div>
+        <h1>Satya Milk Point</h1>
+        <span class="sub">Trusted farmer payments</span>
+      </div>
+    </div>
+    <div class="rate-pill" id="ratePill">₹--/10fat</div>
+  </header>
+
+  <div class="mode-switch" id="modeSwitch">
+    <button class="mode-btn active" data-mode="farmer">🐄 Farmers</button>
+    <button class="mode-btn" data-mode="company">🏭 Companies</button>
+  </div>
+
+  <main id="main">
+    <div class="loading">Opening Satya Milk Point…</div>
+  </main>
+</div>
+
+<nav class="bottom" id="bottomNav"></nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirm">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------- STATE ----------------
+let farmers = [];
+let entries = [];
+let settings = { ratePer10Fat: 82 };
+let payments = [];
+let currentTab = 'entry';
+let entrySelectedFarmerId = null;
+let bulkSelectedFarmerId = null;
+let bulkRange = null; // {start, end}
+let reportRange = null; // {start, end}
+let dataReady = false;
+
+let mode = 'farmer'; // 'farmer' | 'company'
+let companies = [];
+let companyEntries = [];
+let companyPayments = [];
+let companyEntrySelectedId = null;
+let companyBulkSelectedId = null;
+let companyBulkRange = null;
+let companyReportRange = null;
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function fmtDate(s){
+  const d = new Date(s+'T00:00:00');
+  return d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+}
+function fmtMoney(n){
+  return '₹' + Number(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function uid(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function prefersReducedMotion(){
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function showConfirmModal(message, opts={}){
+  return new Promise(resolve=>{
+    const overlay = $('#modalOverlay');
+    $('#modalTitle').textContent = opts.title || 'Please confirm';
+    $('#modalBody').innerHTML = `<div class="hint" style="margin-top:0; font-size:13px;">${message}</div>`;
+    const confirmBtn = $('#modalConfirm');
+    const cancelBtn = $('#modalCancel');
+    confirmBtn.textContent = opts.confirmText || 'Yes';
+    confirmBtn.className = 'btn ' + (opts.danger ? 'btn-danger-solid' : 'btn-primary');
+    cancelBtn.textContent = opts.cancelText || 'Cancel';
+    cancelBtn.style.display = 'inline-flex';
+    overlay.style.display = 'flex';
+
+    function cleanup(){
+      overlay.style.display = 'none';
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      overlay.removeEventListener('click', onOverlay);
+    }
+    function onConfirm(){ cleanup(); resolve(true); }
+    function onCancel(){ cleanup(); resolve(false); }
+    function onOverlay(e){ if(e.target===overlay) onCancel(); }
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', onOverlay);
+  });
+}
+
+function showFormModal(title, fields){
+  return new Promise(resolve=>{
+    const overlay = $('#modalOverlay');
+    $('#modalTitle').textContent = title;
+    $('#modalBody').innerHTML = fields.map(f=>`
+      <label>${f.label}</label>
+      <input type="${f.type||'text'}" id="modalField-${f.id}" value="${f.value!=null?f.value:''}" placeholder="${f.placeholder||''}" ${f.step?`step="${f.step}"`:''}>
+    `).join('');
+    const confirmBtn = $('#modalConfirm');
+    const cancelBtn = $('#modalCancel');
+    confirmBtn.textContent = 'Save';
+    confirmBtn.className = 'btn btn-primary';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.display = 'inline-flex';
+    overlay.style.display = 'flex';
+    setTimeout(()=>{ const first = $('#modalBody input'); if(first) first.focus(); }, 60);
+
+    function cleanup(){
+      overlay.style.display = 'none';
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      overlay.removeEventListener('click', onOverlay);
+    }
+    function onConfirm(){
+      const result = {};
+      fields.forEach(f=>{ result[f.id] = document.getElementById('modalField-'+f.id).value; });
+      cleanup();
+      resolve(result);
+    }
+    function onCancel(){ cleanup(); resolve(null); }
+    function onOverlay(e){ if(e.target===overlay) onCancel(); }
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', onOverlay);
+  });
+}
+
+function animateNumber(el, newValue){
+  if(!el) return;
+  if(prefersReducedMotion()){
+    el.textContent = fmtMoney(newValue);
+    return;
+  }
+  const prevVal = parseFloat(el.dataset.rawValue || '0') || 0;
+  el.dataset.rawValue = newValue;
+  const duration = 450;
+  const start = performance.now();
+  function step(now){
+    const t = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-t, 3);
+    const val = prevVal + (newValue-prevVal)*eased;
+    el.textContent = fmtMoney(val);
+    if(t<1) requestAnimationFrame(step);
+    else el.textContent = fmtMoney(newValue);
+  }
+  requestAnimationFrame(step);
+}
+
+// ---------------- STORAGE ----------------
+async function loadAll(){
+  try{
+    const f = await window.storage.get('farmers-list');
+    farmers = f ? JSON.parse(f.value) : [];
+  }catch(e){ farmers = []; }
+  try{
+    const e = await window.storage.get('milk-entries');
+    entries = e ? JSON.parse(e.value) : [];
+  }catch(e){ entries = []; }
+  try{
+    const s = await window.storage.get('app-settings');
+    settings = s ? JSON.parse(s.value) : { ratePer10Fat: 82 };
+  }catch(e){ settings = { ratePer10Fat: 82 }; }
+  try{
+    const p = await window.storage.get('payment-records');
+    payments = p ? JSON.parse(p.value) : [];
+  }catch(e){ payments = []; }
+  try{
+    const c = await window.storage.get('companies-list');
+    companies = c ? JSON.parse(c.value) : [];
+  }catch(e){ companies = []; }
+  try{
+    const ce = await window.storage.get('company-entries');
+    companyEntries = ce ? JSON.parse(ce.value) : [];
+  }catch(e){ companyEntries = []; }
+  try{
+    const cp = await window.storage.get('company-payments');
+    companyPayments = cp ? JSON.parse(cp.value) : [];
+  }catch(e){ companyPayments = []; }
+  dataReady = true;
+}
+async function saveFarmers(){
+  try{ await window.storage.set('farmers-list', JSON.stringify(farmers)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+async function saveEntries(){
+  try{ await window.storage.set('milk-entries', JSON.stringify(entries)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+async function saveSettings(){
+  try{ await window.storage.set('app-settings', JSON.stringify(settings)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+async function savePayments(){
+  try{ await window.storage.set('payment-records', JSON.stringify(payments)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+async function saveCompanies(){
+  try{ await window.storage.set('companies-list', JSON.stringify(companies)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+async function saveCompanyEntries(){
+  try{ await window.storage.set('company-entries', JSON.stringify(companyEntries)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+async function saveCompanyPayments(){
+  try{ await window.storage.set('company-payments', JSON.stringify(companyPayments)); }
+  catch(e){ toast('Could not save. Try again.'); }
+}
+
+// ---------------- CALC ----------------
+function farmerRate(farmer){
+  if(farmer && farmer.customRate != null && farmer.customRate !== '') return Number(farmer.customRate);
+  return Number(settings.ratePer10Fat);
+}
+function calcPerLiter(fat, farmer){
+  const base = farmerRate(farmer);
+  return (Number(fat)/10) * base;
+}
+function calcAmount(liters, fat, farmer){
+  return calcPerLiter(fat, farmer) * Number(liters);
+}
+function getFarmer(id){ return farmers.find(f=>f.id===id); }
+function getCompany(id){ return companies.find(c=>c.id===id); }
+
+// ---------------- RENDER: SHELL ----------------
+const NAV_ICONS = {
+  entry: '<path d="M12 5v14M5 12h14"/>',
+  farmers: '<circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/>',
+  companies: '<path d="M4 21V9l6-4v16M4 21h16M10 21V13l6-3v11M14 21V9"/>',
+  bulk: '<rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M3.5 9.5h17M9 9.5V20"/>',
+  report: '<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.96 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z"/>'
+};
+const FARMER_TABS = [
+  {id:'entry', label:'Entry'},
+  {id:'farmers', label:'Farmers'},
+  {id:'bulk', label:'15-Day'},
+  {id:'report', label:'Payment'},
+  {id:'settings', label:'Rate'}
+];
+const COMPANY_TABS = [
+  {id:'entry', label:'Entry'},
+  {id:'companies', label:'Companies'},
+  {id:'bulk', label:'15-Day'},
+  {id:'report', label:'Receive'}
+];
+function currentTabList(){
+  return mode==='farmer' ? FARMER_TABS : COMPANY_TABS;
+}
+function renderNav(){
+  const nav = $('#bottomNav');
+  const tabs = currentTabList();
+  nav.innerHTML = tabs.map(t=>`
+    <button data-tab="${t.id}" id="nav-${t.id}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${NAV_ICONS[t.id]}</svg>
+      ${t.label}
+    </button>
+  `).join('');
+  $$('button', nav).forEach(btn=>{
+    btn.addEventListener('click', ()=>switchTab(btn.dataset.tab));
+  });
+  setActiveNav();
+}
+function updateRatePill(){
+  const pill = $('#ratePill');
+  if(mode==='farmer'){
+    pill.textContent = '₹' + settings.ratePer10Fat + ' /10fat';
+  } else {
+    pill.textContent = 'Per-company rate';
+  }
+}
+function setActiveNav(){
+  currentTabList().forEach(t=>{
+    const btn = $('#nav-'+t.id);
+    if(btn) btn.classList.toggle('active', t.id===currentTab);
+  });
+}
+function switchTab(tab){
+  currentTab = tab;
+  setActiveNav();
+  render();
+}
+$$('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(btn.dataset.mode===mode) return;
+    mode = btn.dataset.mode;
+    currentTab = 'entry';
+    $$('.mode-btn').forEach(b=>b.classList.toggle('active', b===btn));
+    renderNav();
+    render();
+  });
+});
+
+function render(){
+  updateRatePill();
+  if(mode==='farmer'){
+    if(currentTab==='entry') renderEntry();
+    else if(currentTab==='farmers') renderFarmers();
+    else if(currentTab==='bulk') renderBulk();
+    else if(currentTab==='report') renderReport();
+    else if(currentTab==='settings') renderSettings();
+  } else {
+    if(currentTab==='entry') renderCompanyEntry();
+    else if(currentTab==='companies') renderCompanies();
+    else if(currentTab==='bulk') renderCompanyBulk();
+    else if(currentTab==='report') renderCompanyReport();
+  }
+  const main = $('#main');
+  main.classList.remove('tab-enter-active');
+  void main.offsetWidth;
+  main.style.animation = 'none';
+  void main.offsetWidth;
+  main.style.animation = '';
+}
+
+// ---------------- ENTRY TAB ----------------
+function renderEntry(){
+  const main = $('#main');
+  const sorted = farmers.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const selFarmer = entrySelectedFarmerId ? getFarmer(entrySelectedFarmerId) : null;
+
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Add today's milk <span class="stamp">Entry</span></h2>
+
+      <label>Farmer</label>
+      ${sorted.length===0 ? `<div class="hint">No farmers added yet. Go to the Farmers tab to add one first.</div>` : `
+      <input type="text" id="farmerSearch" placeholder="Search farmer name or book no." class="search-box">
+      <div class="farmer-pick" id="farmerPick"></div>
+      ${selFarmer ? `<div class="selected-tag">Selected: ${selFarmer.name} (Book #${selFarmer.bookNumber})</div>` : ''}
+      `}
+
+      <div class="row2">
+        <div>
+          <label>Date</label>
+          <input type="date" id="entryDate" value="${todayStr()}">
+        </div>
+        <div>
+          <label>Session</label>
+          <select id="entrySession">
+            <option value="AM">Morning</option>
+            <option value="PM">Evening</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Milk (Litres)</label>
+          <input type="number" id="entryLiters" step="0.1" min="0" placeholder="e.g. 8.5">
+        </div>
+        <div>
+          <label>Fat %</label>
+          <input type="number" id="entryFat" step="0.1" min="0" placeholder="e.g. 4.2">
+        </div>
+      </div>
+
+      <div class="preview" id="entryPreview">
+        <div class="lbl">AMOUNT</div>
+        <div class="amt">₹0.00</div>
+      </div>
+
+      <button class="btn btn-primary" id="saveEntryBtn">Save entry</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Today's entries</h2>
+      <div id="todayList"></div>
+    </div>
+  `;
+
+  // farmer picker
+  if(sorted.length>0){
+    renderFarmerPick(sorted, '');
+    $('#farmerSearch').addEventListener('input', (e)=>{
+      renderFarmerPick(sorted, e.target.value);
+    });
+  }
+
+  $('#entryLiters').addEventListener('input', updateEntryPreview);
+  $('#entryFat').addEventListener('input', updateEntryPreview);
+  updateEntryPreview();
+
+  $('#saveEntryBtn').addEventListener('click', saveEntry);
+
+  renderTodayList();
+}
+
+function renderFarmerPick(list, query){
+  const q = query.trim().toLowerCase();
+  const filtered = q ? list.filter(f => f.name.toLowerCase().includes(q) || String(f.bookNumber).toLowerCase().includes(q)) : list;
+  const box = $('#farmerPick');
+  if(!box) return;
+  if(filtered.length===0){
+    box.innerHTML = `<div class="empty">No match</div>`;
+    return;
+  }
+  box.innerHTML = filtered.map(f=>`
+    <div class="fp-item ${f.id===entrySelectedFarmerId?'selected':''}" data-id="${f.id}">
+      <span>${f.name}</span>
+      <span class="num">#${f.bookNumber}</span>
+    </div>
+  `).join('');
+  $$('.fp-item', box).forEach(el=>{
+    el.addEventListener('click', ()=>{
+      entrySelectedFarmerId = el.dataset.id;
+      renderEntry();
+    });
+  });
+}
+
+function updateEntryPreview(){
+  const liters = parseFloat($('#entryLiters').value) || 0;
+  const fat = parseFloat($('#entryFat').value) || 0;
+  const farmer = entrySelectedFarmerId ? getFarmer(entrySelectedFarmerId) : null;
+  const amt = calcAmount(liters, fat, farmer);
+  const rate = calcPerLiter(fat, farmer);
+  const prev = $('#entryPreview');
+  if(prev){
+    animateNumber(prev.querySelector('.amt'), amt);
+    prev.querySelector('.lbl').textContent = `AMOUNT  (rate ₹${rate.toFixed(2)}/L)`;
+  }
+}
+
+async function saveEntry(){
+  if(!entrySelectedFarmerId){ toast('Please select a farmer'); return; }
+  const liters = parseFloat($('#entryLiters').value);
+  const fat = parseFloat($('#entryFat').value);
+  const date = $('#entryDate').value;
+  const session = $('#entrySession').value;
+  if(!liters || liters<=0){ toast('Enter litres'); return; }
+  if(!fat || fat<=0){ toast('Enter fat %'); return; }
+  if(!date){ toast('Pick a date'); return; }
+
+  const farmer = getFarmer(entrySelectedFarmerId);
+  const rate = calcPerLiter(fat, farmer);
+  const amount = calcAmount(liters, fat, farmer);
+
+  entries.push({
+    id: uid(),
+    farmerId: entrySelectedFarmerId,
+    date, session, liters, fat,
+    rate: Number(rate.toFixed(4)),
+    amount: Number(amount.toFixed(2)),
+    createdAt: Date.now()
+  });
+  await saveEntries();
+  toast('Entry saved');
+  $('#entryLiters').value = '';
+  $('#entryFat').value = '';
+  updateEntryPreview();
+  renderTodayList();
+}
+
+function renderTodayList(){
+  const list = $('#todayList');
+  if(!list) return;
+  const dateVal = $('#entryDate') ? $('#entryDate').value : todayStr();
+  const todays = entries.filter(e=>e.date===dateVal).sort((a,b)=>b.createdAt-a.createdAt);
+  if(todays.length===0){
+    list.innerHTML = `<div class="empty">No entries for this date yet</div>`;
+    return;
+  }
+  list.innerHTML = todays.map(e=>{
+    const f = getFarmer(e.farmerId);
+    return `
+    <div class="ledger-row">
+      <div class="info">
+        <div class="name">${f? f.name : '(removed farmer)'} <span style="font-weight:500;color:var(--text-soft);">· ${e.session==='AM'?'Morning':'Evening'}</span></div>
+        <div class="meta">${e.liters}L × ${e.fat}% fat</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="num" style="font-size:15px;">${fmtMoney(e.amount)}</div>
+        <button class="btn-danger btn" style="margin-top:4px;" data-del="${e.id}">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  $$('[data-del]', list).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ok = await showConfirmModal('Delete this entry?', {confirmText:'Delete', danger:true});
+      if(!ok) return;
+      entries = entries.filter(e=>e.id!==btn.dataset.del);
+      await saveEntries();
+      renderTodayList();
+      toast('Entry deleted');
+    });
+  });
+}
+
+// keep today list live when date changes
+document.addEventListener('change', (e)=>{
+  if(e.target && e.target.id==='entryDate'){ renderTodayList(); }
+});
+
+// ---------------- FARMERS TAB ----------------
+function renderFarmers(){
+  const main = $('#main');
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Add a farmer <span class="stamp">New</span></h2>
+      <label>Farmer name</label>
+      <input type="text" id="fName" placeholder="e.g. Ramesh Rao">
+      <label>Book number</label>
+      <input type="text" id="fBook" placeholder="e.g. 12">
+      <label>Special rate at 10 fat (optional)</label>
+      <input type="number" id="fRate" placeholder="Leave blank to use default ₹${settings.ratePer10Fat}">
+      <div class="field-note">Only fill this if this farmer gets a different price than the default rate.</div>
+      <button class="btn btn-primary" id="addFarmerBtn">Add farmer</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">All farmers (${farmers.length})</h2>
+      <input type="text" id="farmerListSearch" placeholder="Search by name or book no." class="search-box">
+      <div id="farmerListBox"></div>
+    </div>
+  `;
+
+  $('#addFarmerBtn').addEventListener('click', addFarmer);
+  $('#farmerListSearch').addEventListener('input', (e)=> renderFarmerListBox(e.target.value));
+  renderFarmerListBox('');
+}
+
+async function addFarmer(){
+  const name = $('#fName').value.trim();
+  const book = $('#fBook').value.trim();
+  const rateVal = $('#fRate').value.trim();
+  if(!name){ toast('Enter farmer name'); return; }
+  if(!book){ toast('Enter book number'); return; }
+  if(farmers.some(f=>String(f.bookNumber).toLowerCase()===book.toLowerCase())){
+    toast('This book number already exists'); return;
+  }
+  farmers.push({
+    id: uid(),
+    name,
+    bookNumber: book,
+    customRate: rateVal ? Number(rateVal) : null,
+    createdAt: Date.now()
+  });
+  await saveFarmers();
+  toast('Farmer added');
+  renderFarmers();
+}
+
+function renderFarmerListBox(query){
+  const box = $('#farmerListBox');
+  const q = query.trim().toLowerCase();
+  const sorted = farmers.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const filtered = q ? sorted.filter(f=>f.name.toLowerCase().includes(q) || String(f.bookNumber).toLowerCase().includes(q)) : sorted;
+  if(filtered.length===0){
+    box.innerHTML = `<div class="empty">No farmers found</div>`;
+    return;
+  }
+  box.innerHTML = filtered.map(f=>`
+    <div class="ledger-row">
+      <div class="info">
+        <div class="name">${f.name}</div>
+        <div class="meta">Book #${f.bookNumber}${f.customRate!=null ? ` · special rate ₹${f.customRate}/10fat` : ''}</div>
+      </div>
+      <div class="actions">
+        <button class="btn-outline btn" data-edit="${f.id}">Edit</button>
+        <button class="btn-danger btn" data-remove="${f.id}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+  $$('[data-edit]', box).forEach(btn=>{
+    btn.addEventListener('click', ()=>editFarmer(btn.dataset.edit));
+  });
+  $$('[data-remove]', box).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const hasEntries = entries.some(e=>e.farmerId===btn.dataset.remove);
+      const msg = hasEntries ? 'This farmer has milk entries saved. Remove the farmer anyway? Their past entries will stay in records.' : 'Remove this farmer?';
+      const ok = await showConfirmModal(msg, {confirmText:'Remove', danger:true});
+      if(!ok) return;
+      farmers = farmers.filter(f=>f.id!==btn.dataset.remove);
+      await saveFarmers();
+      renderFarmerListBox($('#farmerListSearch').value);
+      toast('Farmer removed');
+    });
+  });
+}
+
+async function editFarmer(id){
+  const f = getFarmer(id);
+  if(!f) return;
+  const result = await showFormModal('Edit farmer', [
+    { id:'name', label:'Farmer name', value:f.name },
+    { id:'book', label:'Book number', value:f.bookNumber },
+    { id:'rate', label:'Special rate at 10 fat (leave blank for default)', value: f.customRate!=null ? f.customRate : '', type:'number', step:'0.1', placeholder:`Default ₹${settings.ratePer10Fat}` }
+  ]);
+  if(!result) return;
+  const newName = result.name.trim();
+  const newBook = result.book.trim();
+  const newRate = result.rate.trim();
+  if(newName) f.name = newName;
+  if(newBook) f.bookNumber = newBook;
+  f.customRate = newRate ? Number(newRate) : null;
+  await saveFarmers();
+  toast('Farmer updated');
+  renderFarmerListBox($('#farmerListSearch') ? $('#farmerListSearch').value : '');
+}
+
+// ---------------- BULK 15-DAY ENTRY TAB ----------------
+function bulkDefaultRange(){
+  const now = new Date();
+  const day = now.getDate();
+  const y = now.getFullYear(), m = now.getMonth();
+  if(day<=15){
+    return { start: fmtISO(new Date(y,m,1)), end: fmtISO(new Date(y,m,15)) };
+  } else {
+    return { start: fmtISO(new Date(y,m,16)), end: fmtISO(new Date(y,m+1,0)) };
+  }
+}
+function dateRangeList(start, end){
+  const list = [];
+  let d = new Date(start+'T00:00:00');
+  const endD = new Date(end+'T00:00:00');
+  while(d<=endD){
+    list.push(fmtISO(d));
+    d.setDate(d.getDate()+1);
+  }
+  return list;
+}
+
+function renderBulk(){
+  if(!bulkRange) bulkRange = bulkDefaultRange();
+  const main = $('#main');
+  const sorted = farmers.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const selFarmer = bulkSelectedFarmerId ? getFarmer(bulkSelectedFarmerId) : null;
+
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Fill 15 days at once <span class="stamp">Catch-up</span></h2>
+      <div class="hint" style="margin-bottom:12px;">Use this at payment time, or any time you missed entering days. Pick the farmer and period below — days already entered will show their saved numbers, and you can fill in the rest or fix mistakes.</div>
+
+      <label>Farmer</label>
+      ${sorted.length===0 ? `<div class="hint">No farmers added yet. Go to the Farmers tab to add one first.</div>` : `
+      <input type="text" id="bulkFarmerSearch" placeholder="Search farmer name or book no." class="search-box">
+      <div class="farmer-pick" id="bulkFarmerPick"></div>
+      ${selFarmer ? `<div class="selected-tag">Selected: ${selFarmer.name} (Book #${selFarmer.bookNumber})</div>` : ''}
+      `}
+
+      <div class="tabs-quick" style="margin-top:14px;">
+        <button class="qbtn" id="bqFirstHalf">1–15 this month</button>
+        <button class="qbtn" id="bqSecondHalf">16–end this month</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>From</label>
+          <input type="date" id="bulkStart" value="${bulkRange.start}">
+        </div>
+        <div>
+          <label>To</label>
+          <input type="date" id="bulkEnd" value="${bulkRange.end}">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="bulkTableCard">
+      <h2 class="section-title">Day-by-day milk & fat</h2>
+      <div id="bulkTable"></div>
+      <div class="total-bar-split" id="bulkSplitBar" style="display:none;">
+        <div class="tb-item am">
+          <div class="tb-l">Morning</div>
+          <div class="tb-v" id="bulkTotalAM">₹0.00</div>
+        </div>
+        <div class="tb-item pm">
+          <div class="tb-l">Evening</div>
+          <div class="tb-v" id="bulkTotalPM">₹0.00</div>
+        </div>
+      </div>
+      <div class="total-bar" id="bulkTotalBar" style="display:none;">
+        <div class="l">FINAL TOTAL</div>
+        <div class="v" id="bulkTotalVal">₹0.00</div>
+      </div>
+      <button class="btn btn-primary" id="saveBulkBtn" style="display:none;">Save all entries</button>
+    </div>
+  `;
+
+  if(sorted.length>0){
+    renderBulkFarmerPick(sorted, '');
+    $('#bulkFarmerSearch').addEventListener('input', (e)=>{
+      renderBulkFarmerPick(sorted, e.target.value);
+    });
+  }
+
+  $('#bulkStart').addEventListener('change', ()=>{ bulkRange.start = $('#bulkStart').value; renderBulkTable(); });
+  $('#bulkEnd').addEventListener('change', ()=>{ bulkRange.end = $('#bulkEnd').value; renderBulkTable(); });
+  $('#bqFirstHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    bulkRange = { start: fmtISO(new Date(y,m,1)), end: fmtISO(new Date(y,m,15)) };
+    renderBulk();
+  });
+  $('#bqSecondHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    bulkRange = { start: fmtISO(new Date(y,m,16)), end: fmtISO(new Date(y,m+1,0)) };
+    renderBulk();
+  });
+
+  $('#bulkTable').addEventListener('input', onBulkInput);
+  renderBulkTable();
+}
+
+function renderBulkFarmerPick(list, query){
+  const q = query.trim().toLowerCase();
+  const filtered = q ? list.filter(f => f.name.toLowerCase().includes(q) || String(f.bookNumber).toLowerCase().includes(q)) : list;
+  const box = $('#bulkFarmerPick');
+  if(!box) return;
+  if(filtered.length===0){
+    box.innerHTML = `<div class="empty">No match</div>`;
+    return;
+  }
+  box.innerHTML = filtered.map(f=>`
+    <div class="fp-item ${f.id===bulkSelectedFarmerId?'selected':''}" data-id="${f.id}">
+      <span>${f.name}</span>
+      <span class="num">#${f.bookNumber}</span>
+    </div>
+  `).join('');
+  $$('.fp-item', box).forEach(el=>{
+    el.addEventListener('click', ()=>{
+      bulkSelectedFarmerId = el.dataset.id;
+      renderBulk();
+    });
+  });
+}
+
+function bulkCellId(date, session, field){
+  return `bulk-${date}-${session}-${field}`;
+}
+
+function renderBulkTable(){
+  const box = $('#bulkTable');
+  if(!box) return;
+  const {start, end} = bulkRange;
+  const totalBar = $('#bulkTotalBar');
+  const splitBar = $('#bulkSplitBar');
+  const saveBtn = $('#saveBulkBtn');
+
+  if(!bulkSelectedFarmerId){
+    box.innerHTML = `<div class="empty">Select a farmer above to begin</div>`;
+    totalBar.style.display='none';
+    splitBar.style.display='none';
+    saveBtn.style.display='none';
+    return;
+  }
+  if(!start || !end || start>end){
+    box.innerHTML = `<div class="empty">Pick a valid date range</div>`;
+    totalBar.style.display='none';
+    splitBar.style.display='none';
+    saveBtn.style.display='none';
+    return;
+  }
+  const dates = dateRangeList(start, end);
+  if(dates.length>40){
+    box.innerHTML = `<div class="empty">Range too long — please pick 40 days or fewer</div>`;
+    totalBar.style.display='none';
+    splitBar.style.display='none';
+    saveBtn.style.display='none';
+    return;
+  }
+
+  const farmer = getFarmer(bulkSelectedFarmerId);
+
+  box.innerHTML = dates.map(date=>{
+    const amEntry = entries.find(e=>e.farmerId===bulkSelectedFarmerId && e.date===date && e.session==='AM');
+    const pmEntry = entries.find(e=>e.farmerId===bulkSelectedFarmerId && e.date===date && e.session==='PM');
+    return `
+    <div class="bulk-day" data-day="${date}">
+      <div class="bulk-day-head">
+        <span class="d">${fmtDate(date)}</span>
+        <span class="amt num" id="daytotal-${date}">₹0.00</span>
+      </div>
+      <div class="bulk-sessions">
+        <div class="bulk-session">
+          <div class="slbl">Morning</div>
+          <div class="inputs">
+            <input type="number" step="0.1" min="0" placeholder="Litres" value="${amEntry?amEntry.liters:''}" id="${bulkCellId(date,'AM','liters')}" data-date="${date}" data-session="AM">
+            <input type="number" step="0.1" min="0" placeholder="Fat %" value="${amEntry?amEntry.fat:''}" id="${bulkCellId(date,'AM','fat')}" data-date="${date}" data-session="AM">
+          </div>
+          <div class="subamt" id="subamt-${date}-AM">₹0.00</div>
+        </div>
+        <div class="bulk-session">
+          <div class="slbl">Evening</div>
+          <div class="inputs">
+            <input type="number" step="0.1" min="0" placeholder="Litres" value="${pmEntry?pmEntry.liters:''}" id="${bulkCellId(date,'PM','liters')}" data-date="${date}" data-session="PM">
+            <input type="number" step="0.1" min="0" placeholder="Fat %" value="${pmEntry?pmEntry.fat:''}" id="${bulkCellId(date,'PM','fat')}" data-date="${date}" data-session="PM">
+          </div>
+          <div class="subamt" id="subamt-${date}-PM">₹0.00</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  dates.forEach(date=>{
+    updateBulkRow(date, farmer);
+  });
+  updateBulkGrandTotal(dates, farmer);
+
+  totalBar.style.display='flex';
+  splitBar.style.display='flex';
+  saveBtn.style.display='block';
+  saveBtn.onclick = saveBulkEntries;
+}
+
+function onBulkInput(e){
+  const t = e.target;
+  if(!t.dataset || !t.dataset.date) return;
+  const farmer = getFarmer(bulkSelectedFarmerId);
+  updateBulkRow(t.dataset.date, farmer);
+  const dates = dateRangeList(bulkRange.start, bulkRange.end);
+  updateBulkGrandTotal(dates, farmer);
+}
+
+function updateBulkRow(date, farmer){
+  let dayTotal = 0;
+  ['AM','PM'].forEach(session=>{
+    const litersEl = document.getElementById(bulkCellId(date,session,'liters'));
+    const fatEl = document.getElementById(bulkCellId(date,session,'fat'));
+    if(!litersEl || !fatEl) return;
+    const liters = parseFloat(litersEl.value) || 0;
+    const fat = parseFloat(fatEl.value) || 0;
+    const amt = (liters>0 && fat>0) ? calcAmount(liters, fat, farmer) : 0;
+    dayTotal += amt;
+    const sub = document.getElementById(`subamt-${date}-${session}`);
+    if(sub) sub.textContent = fmtMoney(amt);
+  });
+  const dt = document.getElementById(`daytotal-${date}`);
+  if(dt) dt.textContent = fmtMoney(dayTotal);
+}
+
+function updateBulkGrandTotal(dates, farmer){
+  let amTotal = 0, pmTotal = 0;
+  dates.forEach(date=>{
+    ['AM','PM'].forEach(session=>{
+      const litersEl = document.getElementById(bulkCellId(date,session,'liters'));
+      const fatEl = document.getElementById(bulkCellId(date,session,'fat'));
+      if(!litersEl || !fatEl) return;
+      const liters = parseFloat(litersEl.value) || 0;
+      const fat = parseFloat(fatEl.value) || 0;
+      if(liters>0 && fat>0){
+        const amt = calcAmount(liters, fat, farmer);
+        if(session==='AM') amTotal += amt; else pmTotal += amt;
+      }
+    });
+  });
+  const total = amTotal + pmTotal;
+  const amEl = $('#bulkTotalAM');
+  const pmEl = $('#bulkTotalPM');
+  const totalVal = $('#bulkTotalVal');
+  if(amEl) animateNumber(amEl, amTotal);
+  if(pmEl) animateNumber(pmEl, pmTotal);
+  if(totalVal) animateNumber(totalVal, total);
+}
+
+async function saveBulkEntries(){
+  const dates = dateRangeList(bulkRange.start, bulkRange.end);
+  const farmer = getFarmer(bulkSelectedFarmerId);
+  let savedCount = 0, clearedCount = 0, skippedPartial = 0;
+
+  dates.forEach(date=>{
+    ['AM','PM'].forEach(session=>{
+      const litersEl = document.getElementById(bulkCellId(date,session,'liters'));
+      const fatEl = document.getElementById(bulkCellId(date,session,'fat'));
+      if(!litersEl || !fatEl) return;
+      const litersRaw = litersEl.value.trim();
+      const fatRaw = fatEl.value.trim();
+      const liters = parseFloat(litersRaw);
+      const fat = parseFloat(fatRaw);
+      const existingIdx = entries.findIndex(e=>e.farmerId===bulkSelectedFarmerId && e.date===date && e.session===session);
+
+      const hasBoth = litersRaw!=='' && fatRaw!=='' && liters>0 && fat>0;
+      const hasNeither = litersRaw==='' && fatRaw==='';
+
+      if(hasBoth){
+        const rate = calcPerLiter(fat, farmer);
+        const amount = calcAmount(liters, fat, farmer);
+        if(existingIdx>=0){
+          entries[existingIdx].liters = liters;
+          entries[existingIdx].fat = fat;
+          entries[existingIdx].rate = Number(rate.toFixed(4));
+          entries[existingIdx].amount = Number(amount.toFixed(2));
+        } else {
+          entries.push({
+            id: uid(), farmerId: bulkSelectedFarmerId, date, session,
+            liters, fat, rate: Number(rate.toFixed(4)), amount: Number(amount.toFixed(2)),
+            createdAt: Date.now()
+          });
+        }
+        savedCount++;
+      } else if(hasNeither){
+        if(existingIdx>=0){
+          entries.splice(existingIdx,1);
+          clearedCount++;
+        }
+      } else {
+        skippedPartial++;
+      }
+    });
+  });
+
+  await saveEntries();
+  renderBulkTable();
+  let msg = `Saved ${savedCount} entries`;
+  if(clearedCount) msg += `, removed ${clearedCount}`;
+  if(skippedPartial) msg += `. ${skippedPartial} rows need both litres & fat`;
+  toast(msg);
+}
+
+// ---------------- REPORT TAB ----------------
+function defaultRange(){
+  const now = new Date();
+  const day = now.getDate();
+  const y = now.getFullYear(), m = now.getMonth();
+  if(day<=15){
+    return { start: fmtISO(new Date(y,m,1)), end: fmtISO(new Date(y,m,15)) };
+  } else {
+    return { start: fmtISO(new Date(y,m,16)), end: fmtISO(new Date(y,m+1,0)) };
+  }
+}
+function fmtISO(d){ return d.toISOString().slice(0,10); }
+
+function renderReport(){
+  if(!reportRange) reportRange = defaultRange();
+  const main = $('#main');
+
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Payment period <span class="stamp">15-day</span></h2>
+      <div class="tabs-quick">
+        <button class="qbtn" id="qFirstHalf">1–15 this month</button>
+        <button class="qbtn" id="qSecondHalf">16–end this month</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>From</label>
+          <input type="date" id="rangeStart" value="${reportRange.start}">
+        </div>
+        <div>
+          <label>To</label>
+          <input type="date" id="rangeEnd" value="${reportRange.end}">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Farmer-wise total</h2>
+      <div id="reportList"></div>
+      <div class="total-bar-split" id="reportSplitBar" style="display:none;">
+        <div class="tb-item am">
+          <div class="tb-l">Morning</div>
+          <div class="tb-v" id="reportTotalAM">₹0.00</div>
+        </div>
+        <div class="tb-item pm">
+          <div class="tb-l">Evening</div>
+          <div class="tb-v" id="reportTotalPM">₹0.00</div>
+        </div>
+      </div>
+      <div class="total-bar" id="reportTotalBar" style="display:none;">
+        <div class="l">FINAL TOTAL</div>
+        <div class="v" id="reportTotalVal">₹0.00</div>
+      </div>
+    </div>
+  `;
+
+  $('#rangeStart').addEventListener('change', ()=>{ reportRange.start = $('#rangeStart').value; renderReportList(); });
+  $('#rangeEnd').addEventListener('change', ()=>{ reportRange.end = $('#rangeEnd').value; renderReportList(); });
+  $('#qFirstHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    reportRange = { start: fmtISO(new Date(y,m,1)), end: fmtISO(new Date(y,m,15)) };
+    renderReport();
+  });
+  $('#qSecondHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    reportRange = { start: fmtISO(new Date(y,m,16)), end: fmtISO(new Date(y,m+1,0)) };
+    renderReport();
+  });
+
+  renderReportList();
+}
+
+function paymentKey(farmerId, start, end){
+  return farmerId+'|'+start+'|'+end;
+}
+function isPaid(farmerId, start, end){
+  return payments.some(p=>p.farmerId===farmerId && p.periodStart===start && p.periodEnd===end);
+}
+
+function renderReportList(){
+  const box = $('#reportList');
+  if(!box) return;
+  const {start, end} = reportRange;
+  if(!start || !end || start>end){
+    box.innerHTML = `<div class="empty">Pick a valid date range</div>`;
+    $('#reportTotalBar').style.display='none';
+    $('#reportSplitBar').style.display='none';
+    return;
+  }
+
+  const inRange = entries.filter(e=>e.date>=start && e.date<=end);
+  const byFarmer = {};
+  inRange.forEach(e=>{
+    if(!byFarmer[e.farmerId]) byFarmer[e.farmerId] = { liters:0, amount:0, fatLiters:0, count:0, amLiters:0, amAmount:0, pmLiters:0, pmAmount:0 };
+    const d = byFarmer[e.farmerId];
+    d.liters += e.liters;
+    d.amount += e.amount;
+    d.fatLiters += e.fat*e.liters;
+    d.count += 1;
+    if(e.session==='AM'){ d.amLiters += e.liters; d.amAmount += e.amount; }
+    else { d.pmLiters += e.liters; d.pmAmount += e.amount; }
+  });
+
+  const ids = Object.keys(byFarmer);
+  if(ids.length===0){
+    box.innerHTML = `<div class="empty">No milk entries in this period</div>`;
+    $('#reportTotalBar').style.display='none';
+    $('#reportSplitBar').style.display='none';
+    return;
+  }
+
+  const rows = ids.map(id=>{
+    const f = getFarmer(id);
+    const d = byFarmer[id];
+    const avgFat = d.liters>0 ? (d.fatLiters/d.liters) : 0;
+    return { id, f, d, avgFat };
+  }).sort((a,b)=> (a.f? a.f.name: '').localeCompare(b.f? b.f.name: ''));
+
+  let total = 0, totalAM = 0, totalPM = 0;
+  box.innerHTML = rows.map(r=>{
+    total += r.d.amount;
+    totalAM += r.d.amAmount;
+    totalPM += r.d.pmAmount;
+    const paid = isPaid(r.id, start, end);
+    return `
+    <div class="report-farmer">
+      <div class="rf-top">
+        <div>
+          <div class="rf-name">${r.f? r.f.name : '(removed farmer)'}</div>
+          <div class="rf-book">${r.f? 'Book #'+r.f.bookNumber : ''}</div>
+        </div>
+        <div class="rf-amt">${fmtMoney(r.d.amount)}</div>
+      </div>
+      <div class="rf-detail">${r.d.liters.toFixed(1)}L total · avg fat ${r.avgFat.toFixed(2)}% · ${r.d.count} entries</div>
+      <div class="rf-split">
+        <span>☀️ Morning: ${r.d.amLiters.toFixed(1)}L · ${fmtMoney(r.d.amAmount)}</span>
+        <span>🌙 Evening: ${r.d.pmLiters.toFixed(1)}L · ${fmtMoney(r.d.pmAmount)}</span>
+      </div>
+      <div class="rf-bottom">
+        <span class="paid-badge ${paid?'paid-yes':'paid-no'}">${paid?'Paid':'Not paid'}</span>
+        <button class="btn ${paid?'btn-outline':'btn-green'}" data-toggle="${r.id}">${paid?'Mark unpaid':'Mark paid'}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  $('#reportTotalBar').style.display='flex';
+  $('#reportSplitBar').style.display='flex';
+  animateNumber($('#reportTotalAM'), totalAM);
+  animateNumber($('#reportTotalPM'), totalPM);
+  animateNumber($('#reportTotalVal'), total);
+
+  $$('[data-toggle]', box).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const fid = btn.dataset.toggle;
+      const already = isPaid(fid, start, end);
+      if(already){
+        payments = payments.filter(p=>!(p.farmerId===fid && p.periodStart===start && p.periodEnd===end));
+        toast('Marked as not paid');
+      } else {
+        const r = rows.find(x=>x.id===fid);
+        payments.push({ id: uid(), farmerId: fid, periodStart: start, periodEnd: end, amount: r.d.amount, paidDate: todayStr() });
+        toast('Marked as paid');
+      }
+      await savePayments();
+      renderReportList();
+    });
+  });
+}
+
+// ---------------- SETTINGS TAB ----------------
+function renderSettings(){
+  const main = $('#main');
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Default rate <span class="stamp">Rate card</span></h2>
+      <label>Rate per litre at 10% fat (₹)</label>
+      <input type="number" id="baseRate" value="${settings.ratePer10Fat}" step="0.1">
+      <div class="hint">
+        Formula used: <strong>Rate per litre = (Fat ÷ 10) × ₹${settings.ratePer10Fat}</strong><br>
+        Example: 4.2% fat → (4.2 ÷ 10) × ₹${settings.ratePer10Fat} = ₹${((4.2/10)*settings.ratePer10Fat).toFixed(2)} per litre
+      </div>
+      <button class="btn btn-primary" id="saveRateBtn">Save rate</button>
+      <div class="field-note">This changes the rate for new entries only. Old entries keep the rate that was used when they were saved, so past payments never change.</div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">About Satya Milk Point</h2>
+      <div class="hint">
+        • Milk is recorded in litres and fat % only (no SNF).<br>
+        • Each farmer can have their own special rate instead of the default.<br>
+        • Use the Payment tab every 15 days to see what to pay each farmer.<br>
+        • Your data is saved automatically and stays private to this account.
+      </div>
+    </div>
+  `;
+
+  $('#saveRateBtn').addEventListener('click', async ()=>{
+    const v = parseFloat($('#baseRate').value);
+    if(!v || v<=0){ toast('Enter a valid rate'); return; }
+    settings.ratePer10Fat = v;
+    await saveSettings();
+    toast('Rate updated');
+    renderSettings();
+    updateRatePill();
+  });
+}
+
+// ---------------- COMPANIES TAB ----------------
+function renderCompanies(){
+  const main = $('#main');
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Add a company <span class="stamp">New</span></h2>
+      <label>Company name</label>
+      <input type="text" id="cName" placeholder="e.g. Heritage Foods">
+      <label>Rate at 10 fat (₹ per litre)</label>
+      <input type="number" id="cRate" step="0.1" placeholder="e.g. 85">
+      <div class="field-note">This is the price this company pays you per litre at 10% fat. Each company can have its own rate.</div>
+      <button class="btn btn-primary" id="addCompanyBtn">Add company</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">All companies (${companies.length})</h2>
+      <input type="text" id="companyListSearch" placeholder="Search by name" class="search-box">
+      <div id="companyListBox"></div>
+    </div>
+  `;
+
+  $('#addCompanyBtn').addEventListener('click', addCompany);
+  $('#companyListSearch').addEventListener('input', (e)=> renderCompanyListBox(e.target.value));
+  renderCompanyListBox('');
+}
+
+async function addCompany(){
+  const name = $('#cName').value.trim();
+  const rateVal = $('#cRate').value.trim();
+  if(!name){ toast('Enter company name'); return; }
+  if(!rateVal || Number(rateVal)<=0){ toast('Enter a valid rate'); return; }
+  if(companies.some(c=>c.name.toLowerCase()===name.toLowerCase())){
+    toast('This company already exists'); return;
+  }
+  companies.push({ id: uid(), name, rate: Number(rateVal), createdAt: Date.now() });
+  await saveCompanies();
+  toast('Company added');
+  renderCompanies();
+}
+
+function renderCompanyListBox(query){
+  const box = $('#companyListBox');
+  const q = query.trim().toLowerCase();
+  const sorted = companies.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const filtered = q ? sorted.filter(c=>c.name.toLowerCase().includes(q)) : sorted;
+  if(filtered.length===0){
+    box.innerHTML = `<div class="empty">No companies found</div>`;
+    return;
+  }
+  box.innerHTML = filtered.map(c=>`
+    <div class="ledger-row">
+      <div class="info">
+        <div class="name">${c.name}</div>
+        <div class="meta">₹${c.rate}/10fat</div>
+      </div>
+      <div class="actions">
+        <button class="btn-outline btn" data-edit="${c.id}">Edit</button>
+        <button class="btn-danger btn" data-remove="${c.id}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+  $$('[data-edit]', box).forEach(btn=>{
+    btn.addEventListener('click', ()=>editCompany(btn.dataset.edit));
+  });
+  $$('[data-remove]', box).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const hasEntries = companyEntries.some(e=>e.companyId===btn.dataset.remove);
+      const msg = hasEntries ? 'This company has supply entries saved. Remove the company anyway? Their past entries will stay in records.' : 'Remove this company?';
+      const ok = await showConfirmModal(msg, {confirmText:'Remove', danger:true});
+      if(!ok) return;
+      companies = companies.filter(c=>c.id!==btn.dataset.remove);
+      await saveCompanies();
+      renderCompanyListBox($('#companyListSearch').value);
+      toast('Company removed');
+    });
+  });
+}
+
+async function editCompany(id){
+  const c = getCompany(id);
+  if(!c) return;
+  const result = await showFormModal('Edit company', [
+    { id:'name', label:'Company name', value:c.name },
+    { id:'rate', label:'Rate at 10 fat (₹ per litre)', value:c.rate, type:'number', step:'0.1' }
+  ]);
+  if(!result) return;
+  const newName = result.name.trim();
+  const newRate = result.rate.trim();
+  if(newName) c.name = newName;
+  if(newRate && Number(newRate)>0) c.rate = Number(newRate);
+  await saveCompanies();
+  toast('Company updated');
+  renderCompanyListBox($('#companyListSearch') ? $('#companyListSearch').value : '');
+}
+
+// ---------------- COMPANY ENTRY TAB ----------------
+function renderCompanyEntry(){
+  const main = $('#main');
+  const sorted = companies.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const selCompany = companyEntrySelectedId ? getCompany(companyEntrySelectedId) : null;
+
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Add today's supply <span class="stamp">Entry</span></h2>
+
+      <label>Company</label>
+      ${sorted.length===0 ? `<div class="hint">No companies added yet. Go to the Companies tab to add one first.</div>` : `
+      <input type="text" id="companySearch" placeholder="Search company name" class="search-box">
+      <div class="farmer-pick" id="companyPick"></div>
+      ${selCompany ? `<div class="selected-tag">Selected: ${selCompany.name} (₹${selCompany.rate}/10fat)</div>` : ''}
+      `}
+
+      <div class="row2">
+        <div>
+          <label>Date</label>
+          <input type="date" id="cEntryDate" value="${todayStr()}">
+        </div>
+        <div>
+          <label>Session</label>
+          <select id="cEntrySession">
+            <option value="AM">Morning</option>
+            <option value="PM">Evening</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Milk (Litres)</label>
+          <input type="number" id="cEntryLiters" step="0.1" min="0" placeholder="e.g. 50">
+        </div>
+        <div>
+          <label>Fat %</label>
+          <input type="number" id="cEntryFat" step="0.1" min="0" placeholder="e.g. 4.0">
+        </div>
+      </div>
+
+      <div class="preview" id="cEntryPreview">
+        <div class="lbl">AMOUNT</div>
+        <div class="amt">₹0.00</div>
+      </div>
+
+      <button class="btn btn-primary" id="saveCompanyEntryBtn">Save entry</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Today's supply entries</h2>
+      <div id="companyTodayList"></div>
+    </div>
+  `;
+
+  if(sorted.length>0){
+    renderCompanyPick(sorted, '');
+    $('#companySearch').addEventListener('input', (e)=>{
+      renderCompanyPick(sorted, e.target.value);
+    });
+  }
+
+  $('#cEntryLiters').addEventListener('input', updateCompanyEntryPreview);
+  $('#cEntryFat').addEventListener('input', updateCompanyEntryPreview);
+  updateCompanyEntryPreview();
+
+  $('#saveCompanyEntryBtn').addEventListener('click', saveCompanyEntry);
+  $('#cEntryDate').addEventListener('change', renderCompanyTodayList);
+
+  renderCompanyTodayList();
+}
+
+function renderCompanyPick(list, query){
+  const q = query.trim().toLowerCase();
+  const filtered = q ? list.filter(c => c.name.toLowerCase().includes(q)) : list;
+  const box = $('#companyPick');
+  if(!box) return;
+  if(filtered.length===0){
+    box.innerHTML = `<div class="empty">No match</div>`;
+    return;
+  }
+  box.innerHTML = filtered.map(c=>`
+    <div class="fp-item ${c.id===companyEntrySelectedId?'selected':''}" data-id="${c.id}">
+      <span>${c.name}</span>
+      <span class="num">₹${c.rate}/10fat</span>
+    </div>
+  `).join('');
+  $$('.fp-item', box).forEach(el=>{
+    el.addEventListener('click', ()=>{
+      companyEntrySelectedId = el.dataset.id;
+      renderCompanyEntry();
+    });
+  });
+}
+
+function updateCompanyEntryPreview(){
+  const liters = parseFloat($('#cEntryLiters').value) || 0;
+  const fat = parseFloat($('#cEntryFat').value) || 0;
+  const company = companyEntrySelectedId ? getCompany(companyEntrySelectedId) : null;
+  const rateObj = company ? {customRate: company.rate} : null;
+  const amt = company ? calcAmount(liters, fat, rateObj) : 0;
+  const rate = company ? calcPerLiter(fat, rateObj) : 0;
+  const prev = $('#cEntryPreview');
+  if(prev){
+    animateNumber(prev.querySelector('.amt'), amt);
+    prev.querySelector('.lbl').textContent = company ? `AMOUNT  (rate ₹${rate.toFixed(2)}/L)` : 'AMOUNT';
+  }
+}
+
+async function saveCompanyEntry(){
+  if(!companyEntrySelectedId){ toast('Please select a company'); return; }
+  const liters = parseFloat($('#cEntryLiters').value);
+  const fat = parseFloat($('#cEntryFat').value);
+  const date = $('#cEntryDate').value;
+  const session = $('#cEntrySession').value;
+  if(!liters || liters<=0){ toast('Enter litres'); return; }
+  if(!fat || fat<=0){ toast('Enter fat %'); return; }
+  if(!date){ toast('Pick a date'); return; }
+
+  const company = getCompany(companyEntrySelectedId);
+  const rateObj = {customRate: company.rate};
+  const rate = calcPerLiter(fat, rateObj);
+  const amount = calcAmount(liters, fat, rateObj);
+
+  companyEntries.push({
+    id: uid(),
+    companyId: companyEntrySelectedId,
+    date, session, liters, fat,
+    rate: Number(rate.toFixed(4)),
+    amount: Number(amount.toFixed(2)),
+    createdAt: Date.now()
+  });
+  await saveCompanyEntries();
+  toast('Entry saved');
+  $('#cEntryLiters').value = '';
+  $('#cEntryFat').value = '';
+  updateCompanyEntryPreview();
+  renderCompanyTodayList();
+}
+
+function renderCompanyTodayList(){
+  const list = $('#companyTodayList');
+  if(!list) return;
+  const dateVal = $('#cEntryDate') ? $('#cEntryDate').value : todayStr();
+  const todays = companyEntries.filter(e=>e.date===dateVal).sort((a,b)=>b.createdAt-a.createdAt);
+  if(todays.length===0){
+    list.innerHTML = `<div class="empty">No entries for this date yet</div>`;
+    return;
+  }
+  list.innerHTML = todays.map(e=>{
+    const c = getCompany(e.companyId);
+    return `
+    <div class="ledger-row">
+      <div class="info">
+        <div class="name">${c? c.name : '(removed company)'} <span style="font-weight:500;color:var(--text-soft);">· ${e.session==='AM'?'Morning':'Evening'}</span></div>
+        <div class="meta">${e.liters}L × ${e.fat}% fat</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="num" style="font-size:15px;">${fmtMoney(e.amount)}</div>
+        <button class="btn-danger btn" style="margin-top:4px;" data-del="${e.id}">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  $$('[data-del]', list).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ok = await showConfirmModal('Delete this entry?', {confirmText:'Delete', danger:true});
+      if(!ok) return;
+      companyEntries = companyEntries.filter(e=>e.id!==btn.dataset.del);
+      await saveCompanyEntries();
+      renderCompanyTodayList();
+      toast('Entry deleted');
+    });
+  });
+}
+
+// ---------------- COMPANY BULK 15-DAY TAB ----------------
+function renderCompanyBulk(){
+  if(!companyBulkRange) companyBulkRange = bulkDefaultRange();
+  const main = $('#main');
+  const sorted = companies.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const selCompany = companyBulkSelectedId ? getCompany(companyBulkSelectedId) : null;
+
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Fill 15 days at once <span class="stamp">Catch-up</span></h2>
+      <div class="hint" style="margin-bottom:12px;">Use this at company payment time, or any time you missed entering days. Pick the company and period below — days already entered will show their saved numbers.</div>
+
+      <label>Company</label>
+      ${sorted.length===0 ? `<div class="hint">No companies added yet. Go to the Companies tab to add one first.</div>` : `
+      <input type="text" id="companyBulkSearch" placeholder="Search company name" class="search-box">
+      <div class="farmer-pick" id="companyBulkPick"></div>
+      ${selCompany ? `<div class="selected-tag">Selected: ${selCompany.name} (₹${selCompany.rate}/10fat)</div>` : ''}
+      `}
+
+      <div class="tabs-quick" style="margin-top:14px;">
+        <button class="qbtn" id="cbqFirstHalf">1–15 this month</button>
+        <button class="qbtn" id="cbqSecondHalf">16–end this month</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>From</label>
+          <input type="date" id="companyBulkStart" value="${companyBulkRange.start}">
+        </div>
+        <div>
+          <label>To</label>
+          <input type="date" id="companyBulkEnd" value="${companyBulkRange.end}">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="companyBulkTableCard">
+      <h2 class="section-title">Day-by-day supply</h2>
+      <div id="companyBulkTable"></div>
+      <div class="total-bar-split" id="companyBulkSplitBar" style="display:none;">
+        <div class="tb-item am">
+          <div class="tb-l">Morning</div>
+          <div class="tb-v" id="companyBulkTotalAM">₹0.00</div>
+        </div>
+        <div class="tb-item pm">
+          <div class="tb-l">Evening</div>
+          <div class="tb-v" id="companyBulkTotalPM">₹0.00</div>
+        </div>
+      </div>
+      <div class="total-bar" id="companyBulkTotalBar" style="display:none;">
+        <div class="l">FINAL TOTAL</div>
+        <div class="v" id="companyBulkTotalVal">₹0.00</div>
+      </div>
+      <button class="btn btn-primary" id="saveCompanyBulkBtn" style="display:none;">Save all entries</button>
+    </div>
+  `;
+
+  if(sorted.length>0){
+    renderCompanyBulkPick(sorted, '');
+    $('#companyBulkSearch').addEventListener('input', (e)=>{
+      renderCompanyBulkPick(sorted, e.target.value);
+    });
+  }
+
+  $('#companyBulkStart').addEventListener('change', ()=>{ companyBulkRange.start = $('#companyBulkStart').value; renderCompanyBulkTable(); });
+  $('#companyBulkEnd').addEventListener('change', ()=>{ companyBulkRange.end = $('#companyBulkEnd').value; renderCompanyBulkTable(); });
+  $('#cbqFirstHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    companyBulkRange = { start: fmtISO(new Date(y,m,1)), end: fmtISO(new Date(y,m,15)) };
+    renderCompanyBulk();
+  });
+  $('#cbqSecondHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    companyBulkRange = { start: fmtISO(new Date(y,m,16)), end: fmtISO(new Date(y,m+1,0)) };
+    renderCompanyBulk();
+  });
+
+  $('#companyBulkTable').addEventListener('input', onCompanyBulkInput);
+  renderCompanyBulkTable();
+}
+
+function renderCompanyBulkPick(list, query){
+  const q = query.trim().toLowerCase();
+  const filtered = q ? list.filter(c => c.name.toLowerCase().includes(q)) : list;
+  const box = $('#companyBulkPick');
+  if(!box) return;
+  if(filtered.length===0){
+    box.innerHTML = `<div class="empty">No match</div>`;
+    return;
+  }
+  box.innerHTML = filtered.map(c=>`
+    <div class="fp-item ${c.id===companyBulkSelectedId?'selected':''}" data-id="${c.id}">
+      <span>${c.name}</span>
+      <span class="num">₹${c.rate}/10fat</span>
+    </div>
+  `).join('');
+  $$('.fp-item', box).forEach(el=>{
+    el.addEventListener('click', ()=>{
+      companyBulkSelectedId = el.dataset.id;
+      renderCompanyBulk();
+    });
+  });
+}
+
+function companyBulkCellId(date, session, field){
+  return `cbulk-${date}-${session}-${field}`;
+}
+
+function renderCompanyBulkTable(){
+  const box = $('#companyBulkTable');
+  if(!box) return;
+  const {start, end} = companyBulkRange;
+  const totalBar = $('#companyBulkTotalBar');
+  const splitBar = $('#companyBulkSplitBar');
+  const saveBtn = $('#saveCompanyBulkBtn');
+
+  if(!companyBulkSelectedId){
+    box.innerHTML = `<div class="empty">Select a company above to begin</div>`;
+    totalBar.style.display='none';
+    splitBar.style.display='none';
+    saveBtn.style.display='none';
+    return;
+  }
+  if(!start || !end || start>end){
+    box.innerHTML = `<div class="empty">Pick a valid date range</div>`;
+    totalBar.style.display='none';
+    splitBar.style.display='none';
+    saveBtn.style.display='none';
+    return;
+  }
+  const dates = dateRangeList(start, end);
+  if(dates.length>40){
+    box.innerHTML = `<div class="empty">Range too long — please pick 40 days or fewer</div>`;
+    totalBar.style.display='none';
+    splitBar.style.display='none';
+    saveBtn.style.display='none';
+    return;
+  }
+
+  const company = getCompany(companyBulkSelectedId);
+
+  box.innerHTML = dates.map(date=>{
+    const amEntry = companyEntries.find(e=>e.companyId===companyBulkSelectedId && e.date===date && e.session==='AM');
+    const pmEntry = companyEntries.find(e=>e.companyId===companyBulkSelectedId && e.date===date && e.session==='PM');
+    return `
+    <div class="bulk-day" data-day="${date}">
+      <div class="bulk-day-head">
+        <span class="d">${fmtDate(date)}</span>
+        <span class="amt num" id="cdaytotal-${date}">₹0.00</span>
+      </div>
+      <div class="bulk-sessions">
+        <div class="bulk-session">
+          <div class="slbl">Morning</div>
+          <div class="inputs">
+            <input type="number" step="0.1" min="0" placeholder="Litres" value="${amEntry?amEntry.liters:''}" id="${companyBulkCellId(date,'AM','liters')}" data-date="${date}" data-session="AM">
+            <input type="number" step="0.1" min="0" placeholder="Fat %" value="${amEntry?amEntry.fat:''}" id="${companyBulkCellId(date,'AM','fat')}" data-date="${date}" data-session="AM">
+          </div>
+          <div class="subamt" id="csubamt-${date}-AM">₹0.00</div>
+        </div>
+        <div class="bulk-session">
+          <div class="slbl">Evening</div>
+          <div class="inputs">
+            <input type="number" step="0.1" min="0" placeholder="Litres" value="${pmEntry?pmEntry.liters:''}" id="${companyBulkCellId(date,'PM','liters')}" data-date="${date}" data-session="PM">
+            <input type="number" step="0.1" min="0" placeholder="Fat %" value="${pmEntry?pmEntry.fat:''}" id="${companyBulkCellId(date,'PM','fat')}" data-date="${date}" data-session="PM">
+          </div>
+          <div class="subamt" id="csubamt-${date}-PM">₹0.00</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  dates.forEach(date=>{
+    updateCompanyBulkRow(date, company);
+  });
+  updateCompanyBulkGrandTotal(dates, company);
+
+  totalBar.style.display='flex';
+  splitBar.style.display='flex';
+  saveBtn.style.display='block';
+  saveBtn.onclick = saveCompanyBulkEntries;
+}
+
+function onCompanyBulkInput(e){
+  const t = e.target;
+  if(!t.dataset || !t.dataset.date) return;
+  const company = getCompany(companyBulkSelectedId);
+  updateCompanyBulkRow(t.dataset.date, company);
+  const dates = dateRangeList(companyBulkRange.start, companyBulkRange.end);
+  updateCompanyBulkGrandTotal(dates, company);
+}
+
+function updateCompanyBulkRow(date, company){
+  let dayTotal = 0;
+  const rateObj = {customRate: company.rate};
+  ['AM','PM'].forEach(session=>{
+    const litersEl = document.getElementById(companyBulkCellId(date,session,'liters'));
+    const fatEl = document.getElementById(companyBulkCellId(date,session,'fat'));
+    if(!litersEl || !fatEl) return;
+    const liters = parseFloat(litersEl.value) || 0;
+    const fat = parseFloat(fatEl.value) || 0;
+    const amt = (liters>0 && fat>0) ? calcAmount(liters, fat, rateObj) : 0;
+    dayTotal += amt;
+    const sub = document.getElementById(`csubamt-${date}-${session}`);
+    if(sub) sub.textContent = fmtMoney(amt);
+  });
+  const dt = document.getElementById(`cdaytotal-${date}`);
+  if(dt) dt.textContent = fmtMoney(dayTotal);
+}
+
+function updateCompanyBulkGrandTotal(dates, company){
+  let amTotal = 0, pmTotal = 0;
+  const rateObj = {customRate: company.rate};
+  dates.forEach(date=>{
+    ['AM','PM'].forEach(session=>{
+      const litersEl = document.getElementById(companyBulkCellId(date,session,'liters'));
+      const fatEl = document.getElementById(companyBulkCellId(date,session,'fat'));
+      if(!litersEl || !fatEl) return;
+      const liters = parseFloat(litersEl.value) || 0;
+      const fat = parseFloat(fatEl.value) || 0;
+      if(liters>0 && fat>0){
+        const amt = calcAmount(liters, fat, rateObj);
+        if(session==='AM') amTotal += amt; else pmTotal += amt;
+      }
+    });
+  });
+  const total = amTotal + pmTotal;
+  const amEl = $('#companyBulkTotalAM');
+  const pmEl = $('#companyBulkTotalPM');
+  const totalVal = $('#companyBulkTotalVal');
+  if(amEl) animateNumber(amEl, amTotal);
+  if(pmEl) animateNumber(pmEl, pmTotal);
+  if(totalVal) animateNumber(totalVal, total);
+}
+
+async function saveCompanyBulkEntries(){
+  const dates = dateRangeList(companyBulkRange.start, companyBulkRange.end);
+  const company = getCompany(companyBulkSelectedId);
+  const rateObj = {customRate: company.rate};
+  let savedCount = 0, clearedCount = 0, skippedPartial = 0;
+
+  dates.forEach(date=>{
+    ['AM','PM'].forEach(session=>{
+      const litersEl = document.getElementById(companyBulkCellId(date,session,'liters'));
+      const fatEl = document.getElementById(companyBulkCellId(date,session,'fat'));
+      if(!litersEl || !fatEl) return;
+      const litersRaw = litersEl.value.trim();
+      const fatRaw = fatEl.value.trim();
+      const liters = parseFloat(litersRaw);
+      const fat = parseFloat(fatRaw);
+      const existingIdx = companyEntries.findIndex(e=>e.companyId===companyBulkSelectedId && e.date===date && e.session===session);
+
+      const hasBoth = litersRaw!=='' && fatRaw!=='' && liters>0 && fat>0;
+      const hasNeither = litersRaw==='' && fatRaw==='';
+
+      if(hasBoth){
+        const rate = calcPerLiter(fat, rateObj);
+        const amount = calcAmount(liters, fat, rateObj);
+        if(existingIdx>=0){
+          companyEntries[existingIdx].liters = liters;
+          companyEntries[existingIdx].fat = fat;
+          companyEntries[existingIdx].rate = Number(rate.toFixed(4));
+          companyEntries[existingIdx].amount = Number(amount.toFixed(2));
+        } else {
+          companyEntries.push({
+            id: uid(), companyId: companyBulkSelectedId, date, session,
+            liters, fat, rate: Number(rate.toFixed(4)), amount: Number(amount.toFixed(2)),
+            createdAt: Date.now()
+          });
+        }
+        savedCount++;
+      } else if(hasNeither){
+        if(existingIdx>=0){
+          companyEntries.splice(existingIdx,1);
+          clearedCount++;
+        }
+      } else {
+        skippedPartial++;
+      }
+    });
+  });
+
+  await saveCompanyEntries();
+  renderCompanyBulkTable();
+  let msg = `Saved ${savedCount} entries`;
+  if(clearedCount) msg += `, removed ${clearedCount}`;
+  if(skippedPartial) msg += `. ${skippedPartial} rows need both litres & fat`;
+  toast(msg);
+}
+
+// ---------------- COMPANY PAYMENT (RECEIVE) TAB ----------------
+function isReceived(companyId, start, end){
+  return companyPayments.some(p=>p.companyId===companyId && p.periodStart===start && p.periodEnd===end);
+}
+
+function renderCompanyReport(){
+  if(!companyReportRange) companyReportRange = defaultRange();
+  const main = $('#main');
+
+  main.innerHTML = `
+    <div class="card">
+      <h2 class="section-title">Receiving period <span class="stamp">15-day</span></h2>
+      <div class="tabs-quick">
+        <button class="qbtn" id="crqFirstHalf">1–15 this month</button>
+        <button class="qbtn" id="crqSecondHalf">16–end this month</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>From</label>
+          <input type="date" id="companyRangeStart" value="${companyReportRange.start}">
+        </div>
+        <div>
+          <label>To</label>
+          <input type="date" id="companyRangeEnd" value="${companyReportRange.end}">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Company-wise total</h2>
+      <div id="companyReportList"></div>
+      <div class="total-bar-split" id="companyReportSplitBar" style="display:none;">
+        <div class="tb-item am">
+          <div class="tb-l">Morning</div>
+          <div class="tb-v" id="companyReportTotalAM">₹0.00</div>
+        </div>
+        <div class="tb-item pm">
+          <div class="tb-l">Evening</div>
+          <div class="tb-v" id="companyReportTotalPM">₹0.00</div>
+        </div>
+      </div>
+      <div class="total-bar" id="companyReportTotalBar" style="display:none;">
+        <div class="l">TOTAL TO RECEIVE</div>
+        <div class="v" id="companyReportTotalVal">₹0.00</div>
+      </div>
+    </div>
+  `;
+
+  $('#companyRangeStart').addEventListener('change', ()=>{ companyReportRange.start = $('#companyRangeStart').value; renderCompanyReportList(); });
+  $('#companyRangeEnd').addEventListener('change', ()=>{ companyReportRange.end = $('#companyRangeEnd').value; renderCompanyReportList(); });
+  $('#crqFirstHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    companyReportRange = { start: fmtISO(new Date(y,m,1)), end: fmtISO(new Date(y,m,15)) };
+    renderCompanyReport();
+  });
+  $('#crqSecondHalf').addEventListener('click', ()=>{
+    const now = new Date(); const y=now.getFullYear(), m=now.getMonth();
+    companyReportRange = { start: fmtISO(new Date(y,m,16)), end: fmtISO(new Date(y,m+1,0)) };
+    renderCompanyReport();
+  });
+
+  renderCompanyReportList();
+}
+
+function renderCompanyReportList(){
+  const box = $('#companyReportList');
+  if(!box) return;
+  const {start, end} = companyReportRange;
+  if(!start || !end || start>end){
+    box.innerHTML = `<div class="empty">Pick a valid date range</div>`;
+    $('#companyReportTotalBar').style.display='none';
+    $('#companyReportSplitBar').style.display='none';
+    return;
+  }
+
+  const inRange = companyEntries.filter(e=>e.date>=start && e.date<=end);
+  const byCompany = {};
+  inRange.forEach(e=>{
+    if(!byCompany[e.companyId]) byCompany[e.companyId] = { liters:0, amount:0, fatLiters:0, count:0, amLiters:0, amAmount:0, pmLiters:0, pmAmount:0 };
+    const d = byCompany[e.companyId];
+    d.liters += e.liters;
+    d.amount += e.amount;
+    d.fatLiters += e.fat*e.liters;
+    d.count += 1;
+    if(e.session==='AM'){ d.amLiters += e.liters; d.amAmount += e.amount; }
+    else { d.pmLiters += e.liters; d.pmAmount += e.amount; }
+  });
+
+  const ids = Object.keys(byCompany);
+  if(ids.length===0){
+    box.innerHTML = `<div class="empty">No supply entries in this period</div>`;
+    $('#companyReportTotalBar').style.display='none';
+    $('#companyReportSplitBar').style.display='none';
+    return;
+  }
+
+  const rows = ids.map(id=>{
+    const c = getCompany(id);
+    const d = byCompany[id];
+    const avgFat = d.liters>0 ? (d.fatLiters/d.liters) : 0;
+    return { id, c, d, avgFat };
+  }).sort((a,b)=> (a.c? a.c.name: '').localeCompare(b.c? b.c.name: ''));
+
+  let total = 0, totalAM = 0, totalPM = 0;
+  box.innerHTML = rows.map(r=>{
+    total += r.d.amount;
+    totalAM += r.d.amAmount;
+    totalPM += r.d.pmAmount;
+    const received = isReceived(r.id, start, end);
+    return `
+    <div class="report-farmer">
+      <div class="rf-top">
+        <div>
+          <div class="rf-name">${r.c? r.c.name : '(removed company)'}</div>
+          <div class="rf-book">${r.c? '₹'+r.c.rate+'/10fat' : ''}</div>
+        </div>
+        <div class="rf-amt">${fmtMoney(r.d.amount)}</div>
+      </div>
+      <div class="rf-detail">${r.d.liters.toFixed(1)}L total · avg fat ${r.avgFat.toFixed(2)}% · ${r.d.count} entries</div>
+      <div class="rf-split">
+        <span>☀️ Morning: ${r.d.amLiters.toFixed(1)}L · ${fmtMoney(r.d.amAmount)}</span>
+        <span>🌙 Evening: ${r.d.pmLiters.toFixed(1)}L · ${fmtMoney(r.d.pmAmount)}</span>
+      </div>
+      <div class="rf-bottom">
+        <span class="paid-badge ${received?'paid-yes':'paid-no'}">${received?'Received':'Not received'}</span>
+        <button class="btn ${received?'btn-outline':'btn-green'}" data-toggle="${r.id}">${received?'Mark not received':'Mark received'}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  $('#companyReportTotalBar').style.display='flex';
+  $('#companyReportSplitBar').style.display='flex';
+  animateNumber($('#companyReportTotalAM'), totalAM);
+  animateNumber($('#companyReportTotalPM'), totalPM);
+  animateNumber($('#companyReportTotalVal'), total);
+
+  $$('[data-toggle]', box).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const cid = btn.dataset.toggle;
+      const already = isReceived(cid, start, end);
+      if(already){
+        companyPayments = companyPayments.filter(p=>!(p.companyId===cid && p.periodStart===start && p.periodEnd===end));
+        toast('Marked as not received');
+      } else {
+        const r = rows.find(x=>x.id===cid);
+        companyPayments.push({ id: uid(), companyId: cid, periodStart: start, periodEnd: end, amount: r.d.amount, receivedDate: todayStr() });
+        toast('Marked as received');
+      }
+      await saveCompanyPayments();
+      renderCompanyReportList();
+    });
+  });
+}
+
+// ---------------- INIT ----------------
+(async function init(){
+  await loadAll();
+  renderNav();
+  render();
+})();
+</script>
+</body>
+</html>
